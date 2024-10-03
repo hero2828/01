@@ -1,11 +1,13 @@
-import { WebGLRenderer, Scene, WebGLRenderTarget, PerspectiveCamera, OrthographicCamera, AmbientLight, PlaneGeometry, ShaderMaterial, Mesh } from "three"
+import type { WebGLRenderer } from 'three'
+import { AmbientLight, Mesh, OrthographicCamera, PerspectiveCamera, PlaneGeometry, Scene, ShaderMaterial, WebGLRenderTarget } from 'three'
+
 export class FxScene {
-  renderer: WebGLRenderer;
-  fbo: WebGLRenderTarget;
-  camera: PerspectiveCamera;
-  scene: Scene;
-  clearColor: number = 0x000000;
-  controls: OrbitControls;
+  renderer: WebGLRenderer
+  fbo: WebGLRenderTarget
+  camera: PerspectiveCamera
+  scene: Scene
+  clearColor: number = 0x000000
+  controls: OrbitControls
   constructor({ renderer }: { renderer: WebGLRenderer }) {
     this.renderer = renderer
     this.fbo = new WebGLRenderTarget(innerWidth, innerHeight)
@@ -16,54 +18,56 @@ export class FxScene {
     this.controls = new OrbitControls(this.camera, renderer.domElement)
     this.controls.enableDamping = true
   }
+
   resize() {
     this.camera.aspect = innerWidth / innerHeight
     this.camera.updateProjectionMatrix()
     this.renderer.setSize(innerWidth, innerHeight)
   }
+
   render(rtt: boolean) {
     this.renderer.setClearColor(this.clearColor)
     if (rtt) {
       this.renderer.setRenderTarget(this.fbo)
       this.renderer.clear()
-    } else {
+    }
+    else {
       this.renderer.setRenderTarget(null)
     }
     this.renderer.render(this.scene, this.camera)
   }
-
 }
 
 export class Transition {
-  scene: Scene;
-  camera: OrthographicCamera;
-  ambient: AmbientLight;
-  geometry: PlaneGeometry;
-  material: ShaderMaterial;
-  mesh: Mesh;
-  renderer: WebGLRenderer;
-  sceneList: FxScene[];
-  index: number;
+  scene: Scene
+  camera: OrthographicCamera
+  ambient: AmbientLight
+  geometry: PlaneGeometry
+  material: ShaderMaterial
+  mesh: Mesh
+  renderer: WebGLRenderer
+  sceneList: FxScene[]
+  index: number
   constructor({ renderer, sceneList }: { renderer: WebGLRenderer, sceneList: FxScene[] }) {
-    this.index = 0;
+    this.index = 0
     this.renderer = renderer
-    this.sceneList = sceneList;
+    this.sceneList = sceneList
     this.scene = new Scene()
     this.camera = new OrthographicCamera(innerWidth / -2, innerWidth / 2, innerHeight / 2, innerHeight / -2, -10, 10)
     this.camera.position.set(0, 0, 2)
-    this.ambient = new AmbientLight(0xffffff, 2)
+    this.ambient = new AmbientLight(0xFFFFFF, 2)
     this.scene.add(this.ambient)
     this.geometry = new PlaneGeometry(innerWidth, innerHeight)
     this.material = new ShaderMaterial({
       uniforms: {
         tDiffuse1: {
-          value: sceneList[0].fbo.texture
+          value: sceneList[0].fbo.texture,
         },
         tDiffuse2: {
-          value: sceneList[1].fbo.texture
+          value: sceneList[1].fbo.texture,
         },
         progress: {
-          value: 0
+          value: 0,
         },
       },
       vertexShader: `
@@ -87,13 +91,14 @@ export class Transition {
           color=mix(color1.xyz,color2.xyz,progress);
           gl_FragColor = vec4(color.xyz,1.0);
         }
-      `
+      `,
     })
     this.mesh = new Mesh(this.geometry, this.material)
     this.scene.add(this.mesh)
   }
+
   resize() {
-    this.sceneList.forEach(scene => {
+    this.sceneList.forEach((scene) => {
       scene.resize()
     })
     this.camera.left = innerWidth / -2
@@ -103,15 +108,18 @@ export class Transition {
     this.camera.updateProjectionMatrix()
     this.renderer.setSize(innerWidth, innerHeight)
   }
+
   render(uniforms: any) {
     this.material.uniforms.progress.value = uniforms.progress.value
-    const index = this.index;
-    const next = index + 1;
+    const index = this.index
+    const next = index + 1
     if (uniforms.progress.value <= 0) {
       this.sceneList[index].render(false)
-    } else if (uniforms.progress.value >= 1) {
+    }
+    else if (uniforms.progress.value >= 1) {
       this.sceneList[next].render(false)
-    } else {
+    }
+    else {
       this.sceneList[index].render(true)
       this.sceneList[next].render(true)
       this.renderer.setRenderTarget(null)

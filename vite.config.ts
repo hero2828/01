@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
 import AutoImport from 'unplugin-auto-import/vite'
+import { defineConfig } from 'vite'
 import { useThree } from './src/resolver'
 // https://vitejs.dev/config/
 export default defineConfig({

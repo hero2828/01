@@ -1,6 +1,6 @@
+import type { Resolver } from 'unplugin-auto-import/types'
 import * as THREE from 'three'
 import * as addons from 'three/addons'
-import type { Resolver } from 'unplugin-auto-import/types'
 
 export function useThree(): Resolver {
   const keys1 = Object.keys(THREE)

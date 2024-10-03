@@ -1,56 +1,55 @@
-import { BufferGeometry, InstancedBufferAttribute, InstancedBufferGeometry, Line, Vector2, Vector3 } from "three";
-
-
+import { BufferGeometry, InstancedBufferAttribute, InstancedBufferGeometry, Line, Vector2, Vector3 } from 'three'
 
 export class DepthData extends WebGLRenderTarget {
   constructor(size, camParams) {
-    super(size, size);
-    this.texture.minFilter = NearestFilter;
-    this.texture.magFilter = NearestFilter;
-    this.stencilBuffer = false;
-    this.depthTexture = new DepthTexture();
-    this.depthTexture.format = DepthFormat;
-    this.depthTexture.type = UnsignedIntType;
+    super(size, size)
+    this.texture.minFilter = NearestFilter
+    this.texture.magFilter = NearestFilter
+    this.stencilBuffer = false
+    this.depthTexture = new DepthTexture()
+    this.depthTexture.format = DepthFormat
+    this.depthTexture.type = UnsignedIntType
 
-    let hw = camParams.width * 0.5;
-    let hh = camParams.height * 0.5;
-    let d = camParams.depth;
-    this.depthCam = new OrthographicCamera(-hw, hw, hh, -hh, 0, d);
-    this.depthCam.layers.set(1);
-    this.depthCam.position.set(0, d, 0);
-    this.depthCam.lookAt(0, 0, 0);
+    const hw = camParams.width * 0.5
+    const hh = camParams.height * 0.5
+    const d = camParams.depth
+    this.depthCam = new OrthographicCamera(-hw, hw, hh, -hh, 0, d)
+    this.depthCam.layers.set(1)
+    this.depthCam.position.set(0, d, 0)
+    this.depthCam.lookAt(0, 0, 0)
   }
 
   update(renderer: any, scene: any) {
-    renderer.setRenderTarget(this);
-    renderer.render(scene, this.depthCam);
-    renderer.setRenderTarget(null);
+    renderer.setRenderTarget(this)
+    renderer.render(scene, this.depthCam)
+    renderer.setRenderTarget(null)
   }
 }
 
 export class Rain extends Line {
   constructor(size: Vector3, amount: number, gu: any) {
-    let v = new Vector3();
-    let gBase = new BufferGeometry().setFromPoints([new Vector2(0, 0), new Vector2(0, 1)])
-    let g = new InstancedBufferGeometry().copy(gBase)
-    g.setAttribute("instPos", new InstancedBufferAttribute(
+    const v = new Vector3()
+    const gBase = new BufferGeometry().setFromPoints([new Vector2(0, 0), new Vector2(0, 1)])
+    const g = new InstancedBufferGeometry().copy(gBase)
+    g.setAttribute('instPos', new InstancedBufferAttribute(
       new Float32Array(
         Array.from({ length: amount }, () => {
-          v.random().subScalar(0.5);
-          v.y += 0.5;
-          v.multiply(size);
-          return [...v];
-        }).flat()
-      ), 3
+          v.random().subScalar(0.5)
+          v.y += 0.5
+          v.multiply(size)
+          return [...v]
+        }).flat(),
+      ),
+      3,
     ))
-    g.instanceCount = amount;
+    g.instanceCount = amount
 
-    let m = new LineBasicMaterial({
-      color: 0x4488ff,
+    const m = new LineBasicMaterial({
+      color: 0x4488FF,
       transparent: true,
-      onBeforeCompile: shader => {
-        shader.uniforms.depthData = gu.depthData;
-        shader.uniforms.time = gu.time;
+      onBeforeCompile: (shader) => {
+        shader.uniforms.depthData = gu.depthData
+        shader.uniforms.time = gu.time
         shader.vertexShader = `
           uniform float time;
           
@@ -60,8 +59,8 @@ export class Rain extends Line {
           varying vec3 vPos;
           ${shader.vertexShader}
         `.replace(
-          `#include <begin_vertex>`,
-          `#include <begin_vertex>
+    `#include <begin_vertex>`,
+    `#include <begin_vertex>
           
           float t = time;
           vec3 iPos = instPos;
@@ -73,9 +72,9 @@ export class Rain extends Line {
           vPos = transformed;
           
           colorTransition = position.y;
-          `
-        );
-        //console.log(shader.vertexShader);
+          `,
+  )
+        // console.log(shader.vertexShader);
 
         shader.fragmentShader = `
           uniform sampler2D depthData;
@@ -83,8 +82,8 @@ export class Rain extends Line {
           varying vec3 vPos;
           ${shader.fragmentShader}
         `.replace(
-          `vec4 diffuseColor = vec4( diffuse, opacity );`,
-          `
+    `vec4 diffuseColor = vec4( diffuse, opacity );`,
+    `
           vec2 depthUV = (vPos.xz + 10.) / 20.;
           depthUV.y = 1. - depthUV.y;
           
@@ -98,12 +97,12 @@ export class Rain extends Line {
           float distVal = smoothstep(3., 0., vPos.y - actualDepth);
           vec3 col = mix(diffuse, vec3(0.9), distVal); // the closer, the whiter
           vec4 diffuseColor = vec4( mix(col, col + 0.1, pow(trns, 16.)), (opacity * (0.25 + 0.75 * distVal)) * trns );
-          `
-        );
-        //console.log(shader.fragmentShader);
-      }
+          `,
+  )
+        // console.log(shader.fragmentShader);
+      },
     })
-    super(g, m);
-    this.frustumCulled = false;
+    super(g, m)
+    this.frustumCulled = false
   }
 }

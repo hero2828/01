@@ -1,7 +1,7 @@
-import { Material, Object3D, Texture } from "three";
+import { Material, Object3D, Texture } from 'three'
 
 export class ResourceTracker {
-  resources: Set<unknown>;
+  resources: Set<unknown>
 
   constructor() {
     this.resources = new Set()
@@ -17,14 +17,15 @@ export class ResourceTracker {
       return resource
     }
     if (resource.dispose || resource instanceof Object3D) {
-      this.resources.add(resource);
+      this.resources.add(resource)
     }
 
     if (resource instanceof Object3D) {
       this.track(resource.geometry)
       this.track(resource.material)
       this.track(resource.children)
-    } else if (resource instanceof Material) {
+    }
+    else if (resource instanceof Material) {
       for (const value of Object.values(resource)) {
         if (value instanceof Texture) {
           this.track(value)
@@ -33,7 +34,7 @@ export class ResourceTracker {
       if (resource.uniforms) {
         for (const value of Object.values(resource.uniforms)) {
           if (value) {
-            const uniformVlaue = value.value;
+            const uniformVlaue = value.value
             if (uniformVlaue instanceof Texture || Array.isArray(uniformVlaue)) {
               this.track(uniformVlaue)
             }
@@ -43,11 +44,12 @@ export class ResourceTracker {
     }
     return resource
   }
+
   untrack<T>(resource: T) {
     this.resources.delete(resource)
   }
+
   dispose() {
-    console.log(this.resources)
     for (const resource of this.resources) {
       if (resource instanceof Object3D) {
         if (resource.parent) {
