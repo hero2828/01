@@ -1,5 +1,6 @@
 import type { WebGLRenderer } from 'three'
 import { AmbientLight, Mesh, OrthographicCamera, PerspectiveCamera, PlaneGeometry, Scene, ShaderMaterial, WebGLRenderTarget } from 'three'
+import { OrbitControls } from 'three/addons'
 
 export class FxScene {
   renderer: WebGLRenderer

@@ -1,3 +1,4 @@
+import type { Mesh } from 'three'
 import { Material, Object3D, Texture } from 'three'
 
 export class ResourceTracker {
@@ -7,7 +8,7 @@ export class ResourceTracker {
     this.resources = new Set()
   }
 
-  track<T>(resource: T) {
+  track<T extends Mesh>(resource: T) {
     if (!resource) {
       return resource
     }
