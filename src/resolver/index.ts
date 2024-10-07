@@ -24,6 +24,18 @@ export function useThree(): Resolver {
         from: 'three/examples/jsm/libs/lil-gui.module.min',
       }
     }
+    if (['SimplexNoise'].includes(name)) {
+      return {
+        name,
+        from: 'three/examples/jsm/math/SimplexNoise',
+      }
+    }
+    if (['mergeGeometries'].includes(name)) {
+      return {
+        name,
+        from: 'three/examples/jsm/utils/BufferGeometryUtils',
+      }
+    }
     if (['Stats'].includes(name)) {
       return {
         name: 'default',

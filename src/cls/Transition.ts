@@ -13,7 +13,7 @@ export class FxScene {
     this.renderer = renderer
     this.fbo = new WebGLRenderTarget(innerWidth, innerHeight)
     this.camera = new PerspectiveCamera(50, innerWidth / innerHeight, 1, 1000)
-    this.camera.position.z = 20
+    this.camera.position.z = 10
     this.scene = new Scene()
     // 控制器
     this.controls = new OrbitControls(this.camera, renderer.domElement)
